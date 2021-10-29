@@ -1,32 +1,47 @@
-# 🔖OSS_Project
-## ⛑️Detects wearing a helmet
+# 🔖 Open Source design baSic _ Project
+## ⛑️ Detects wearing a helmet
 
 |Team 11|Weeks|Distributing roles|
 |-|-|-|
-||Week1|개발환경을 세팅, Dataset 준비 및 라벨링 작업|
-||WeeK2|라벨링된 이미지를 keras라이브러리를 이용해 학습시킴|
-||Week3|학습시킨 데이터를 RaspberryPi에 적용해 테스트함|
-||WeeK4|설정값을 변경하며 원하는 결과가 나올 때까지 테스트를 진행|
+|-|Week1|개발환경을 세팅, Dataset 준비 및 라벨링 작업|
+|-|WeeK2|라벨링된 이미지를 keras라이브러리를 이용해 학습시킴|
+|-|Week3|학습시킨 데이터를 RaspberryPi에 적용해 테스트함|
+|-|WeeK4|설정값을 변경하며 원하는 결과가 나올 때까지 테스트를 진행|
 
 ## Needs
 
-- Darknet YOLO3 Tiny Framework
-- RaspberryPi
+- >Darknet YOLO3 Tiny Framework
+- >keras Library
+- >RaspberryPi
     - Camera
     - Speaker
 
+* * *
 ## Summery :
 ```
 운전자의 안전모 착용 유무를 확인하여 미착용시 경고음을 출력한다.
 
-Darknet의 yolo3 tiny 프레임워크 오픈소스를 사용하여 안전모 착용모습을 학습시킴. 인식에 실패할 경우 경고음을 내보낸다
+Darknet의 yolo3 tiny 프레임워크 오픈소스를 사용하여 안전모 착용모습을 학습시킴.
+인식에 실패할 경우 경고음을 내보낸다
 
-머리를 보호 할 수 있는 안전 장비라면(모자나 방한용품은 제외) 모두 인식이 될 수 있도록 신뢰도가 높은 dataset을 준비해야하고 미인식시에 정상적으로 스피커에서 출력이 발생 할 수 있도록 해야 한다.
+머리를 보호 할 수 있는 안전 장비라면(모자나 방한용품은 제외) 모두 인식이 될 수 
+있도록 신뢰도가 높은 dataset을 준비해야하고 미인식시에 정상적으로 스피커에서 
+출력이 발생 할 수 있도록 해야 한다.
 
-중상이나 사망사고를 줄일 수 있는 방안이 될 것이다. 또한, 이용자들의 안전 장비 착용에 대한 인식 개선에도 기여할 것으로 기대가 된다
+중상이나 사망사고를 줄일 수 있는 방안이 될 것이다. 또한, 이용자들의 안전 장비 
+착용에 대한 인식 개선에도 기여할 것으로 기대가 된다
 ```
 
-## Labeling
+## Thanks for
+
+
+- Darknet Framework : [Darknet](https://github.com/pjreddie/darknet.gi, "darknet link")
+
+- Keras Library : [Keras](https://github.com/keras-team/keras.git, "keras link")
+
+# How to Use?
+
+### Labeling
 
 - https://github.com/tzutalin/labelImg.git
 
@@ -60,7 +75,7 @@ Darknet의 yolo3 tiny 프레임워크 오픈소스를 사용하여 안전모 착
 # labelImg는 이미지 상의 오브젝트의 위치와 종류를 xml 형태로 반환합니다.
 ```
 
-## Resizing
+### Resizing
 
 - Image Resizing
 ```python
@@ -91,7 +106,7 @@ def changeLabel(xmlPath, newXmlPath, imgPath, boxes):
     tree.write(newXmlPath, encoding='utf8')
 ```
 
-## Image Generating
+### Image Generating
 - horizontal flip
 ```python
 import random
@@ -141,7 +156,7 @@ for imgFile in imgFiles:
     changeLabel(label, newXmlPath, newImgPath, bboxes)
 ```
 
-## YOLO Training - keras
+### YOLO Training - keras
 - tiny yolov3 pretrained weights 
 ```
 wget https://pjreddie.com/media/files/yolov3-tiny.weights
@@ -151,7 +166,7 @@ wget https://pjreddie.com/media/files/yolov3-tiny.weights
 python convert.py yolov3-tiny.cfg yolov3-tiny.weights model_data/yolo_tiny.h5
 ```
 - tiny YOLO v3 converted model test
-```
+```python
 from IPython.display import display
 from PIL import Image
 from yolo import YOLO
@@ -165,7 +180,7 @@ def objectDetection(file, model_path, class_path):
 objectDetection('dog.jpg', 'model_data/yolo_tiny.h5', 'model_data/coco_classes.txt'
 ```
 
-## Convert Annotation
+### Convert Annotation
 - Annotation example
 ```
 path/to/img1.jpg 50,100,150,200,0 30,50,200,120,3
