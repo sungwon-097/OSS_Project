@@ -3,9 +3,9 @@
 
 |Team 11|Weeks|Distributing roles|
 |-|-|-|
-|-|Week1|개발환경을 세팅, Dataset 준비 및 라벨링 작업|
-|-|WeeK2|라벨링된 이미지를 keras라이브러리를 이용해 학습시킴|
-|-|Week3|학습시킨 데이터를 RaspberryPi에 적용해 테스트함|
+|-|Week1|개발환경을 세팅, `Dataset` 준비 및 라벨링 작업|
+|-|WeeK2|라벨링된 이미지를 `keras`라이브러리를 이용해 학습시킴|
+|-|Week3|학습시킨 데이터를 `RaspberryPi`에 적용해 테스트함|
 |-|WeeK4|설정값을 변경하며 원하는 결과가 나올 때까지 테스트를 진행|
 
 ## Needs
