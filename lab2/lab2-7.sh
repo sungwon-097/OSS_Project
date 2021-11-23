@@ -7,7 +7,10 @@ if [ ! -d $file ]; then
         for i in 0 1 2 3 4
                 do
                         touch $file$i.txt
-			ln -s $file$i.txt $file$i
+			mkdir $file$i
+			cd $file$i
+			ln -s ./$file$i.txt $file$i.txt
+			cd ..
                 done
         ls
 else
