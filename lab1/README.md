@@ -38,7 +38,7 @@ Detection이 성공적으로 이뤄진다면 중상이나 사망사고를 줄일
 
 ## Graph
 
-![img](Graph.png)
+![img](graph.PNG)
 
 # How to Use?
 
