@@ -4,40 +4,41 @@
 |Team 11|Weeks|Distributing roles|
 |-|-|-|
 |-|Week1|개발환경을 세팅, `Dataset` 준비 및 라벨링 작업|
-|-|WeeK2|라벨링된 이미지를 `keras`라이브러리를 이용해 학습시킴|
-|-|Week3|학습시킨 데이터를 `RaspberryPi`에 적용해 테스트함|
-|-|WeeK4|설정값을 변경하며 원하는 결과가 나올 때까지 테스트를 진행|
+|-|WeeK2|라벨링된 이미지를 `Yolov5s`를 이용해 학습시킴|
+|-|WeeK3|설정값을 변경하며 원하는 결과가 나올 때까지 테스트를 진행|
 
 ## Needs
 
-- >Darknet YOLO3 Tiny Framework
-- >keras Library
-- >RaspberryPi
-    - Camera
-    - Speaker
+- >pyTorch 기반 Yolov5
+- >Cuda, Cudnn 신경망
 
 * * *
 ## Summary :
 ```
 운전자의 안전모 착용 유무를 확인하여 미착용시 경고음을 출력한다.
 
-Darknet의 yolo3 tiny 프레임워크 오픈소스를 사용하여 안전모 착용모습을 학습시킴.
+Yolov5 프레임워크 오픈소스를 사용하여 안전모 착용모습을 학습시킴.
 인식에 실패할 경우 경고음을 내보낸다
 
 머리를 보호 할 수 있는 안전 장비라면(모자나 방한용품은 제외) 모두 인식이 될 수 
-있도록 신뢰도가 높은 dataset을 준비해야하고 미인식시에 정상적으로 스피커에서 
-출력이 발생 할 수 있도록 해야 한다.
+있도록 신뢰도가 높은 dataset을 준비해야한다.
 
-중상이나 사망사고를 줄일 수 있는 방안이 될 것이다. 또한, 이용자들의 안전 장비 
-착용에 대한 인식 개선에도 기여할 것으로 기대가 된다
+Detection이 성공적으로 이뤄진다면 중상이나 사망사고를 줄일 수 있는 방안이 될 것이다.
+또한, 이용자들의 안전 장비 착용에 대한 인식 개선에도 기여할 것으로 기대가 된다
 ```
 
 ## Thanks for
 
 
-- Darknet Framework : [Darknet](https://github.com/pjreddie/darknet.gi, "darknet link")
+- Yolov5 Framework : [Yolov5](https://github.com/ultralytics/yolov5.git, "Yolov5 link")
 
-- Keras Library : [Keras](https://github.com/keras-team/keras.git, "keras link")
+- LabelImg : [labelImg](https://github.com/tzutalin/labelImg.git, "labelImg link")
+
+- Roboflow : [labelImg](https://roboflow.com/, "Roboflow link")
+
+## Graph
+
+![img](Graph.png)
 
 # How to Use?
 
@@ -45,175 +46,56 @@ Darknet의 yolo3 tiny 프레임워크 오픈소스를 사용하여 안전모 착
 
 - https://github.com/tzutalin/labelImg.git
 
-```python
-<annotation>
-	<folder>lamp_on</folder>
-	<filename>0.jpg</filename>
-	<path>/lamp_on/0.jpg</path>
-	<source>
-		<database>Unknown</database>
-	</source>
-	<size>
-		<width>1920</width>
-		<height>1080</height>
-		<depth>3</depth>
-	</size>
-	<segmented>0</segmented>
-	<object>
-		<name>lamp_on</name>
-		<pose>Unspecified</pose>
-		<truncated>0</truncated>
-		<difficult>0</difficult>
-		<bndbox>
-			<xmin>704</xmin>
-			<ymin>384</ymin>
-			<xmax>970</xmax>
-			<ymax>546</ymax>
-		</bndbox>
-	</object>
-</annotation>
-# labelImg는 이미지 상의 오브젝트의 위치와 종류를 xml 형태로 반환합니다.
 ```
 
-### Resizing
+$ git clonehttps://github.com/tzutalin/labelImg.git
+$ cd labelImg
+$ python labelimg
 
-- Image Resizing
-```python
-from PIL import Image
-for image_file in images:
-  image = Image.open(image_file)
-  resize_image = image.resize((192, 108))
-  resize_image.save(new_path)
-```
+# class와 names에 맞게 labeling 진행
 
--  Label Resizing
-```python
-def changeLabel(xmlPath, newXmlPath, imgPath, boxes):
-    tree = elemTree.parse(xmlPath)
+$ git clone https://github.com/ultralytics/yolov5  # clone repo
+$ cd yolov5
+$ git reset --hard 886f1c03d839575afecb059accf74296fad395b6
 
-    # path 변경
-    path = tree.find('./path')
-    path.text = imgPath[0]
+# clone YOLOv5 repository
 
-    # bounding box 변경
-    objects = tree.findall('./object')
-    for i, object_ in enumerate(objects):
-        bndbox = object_.find('./bndbox')
-        bndbox.find('./xmin').text = str(boxes[i][0])
-        bndbox.find('./ymin').text = str(boxes[i][1])
-        bndbox.find('./xmax').text = str(boxes[i][2])
-        bndbox.find('./ymax').text = str(boxes[i][3])
-    tree.write(newXmlPath, encoding='utf8')
-```
+$ cd /content/yolov5
+$ cat ../data.yaml
 
-### Image Generating
-- horizontal flip
-```python
-import random
-import numpy as np
-class RandomHorizontalFlip(object):
-    def __init__(self, p=0.5):
-        self.p = p
+    train: ../train/images
+    val: ../valid/images
 
-    def __call__(self, img, bboxes):
-        img_center = np.array(img.shape[:2])[::-1]/2
-        img_center = img_center.astype(int)
-        img_center = np.hstack((img_center, img_center))
-        if random.random() < self.p:
-            img = img[:, ::-1, :]
-            bboxes[:, [0, 2]] += 2*(img_center[[0, 2]] - bboxes[:, [0, 2]])
-            box_w = abs(bboxes[:, 0] - bboxes[:, 2])
-            bboxes[:, 0] -= box_w
-            bboxes[:, 2] += box_w
-        return img, bboxes
-```
-- label generating 
-```python
-for imgFile in imgFiles:
-    fileName = imgFile.split('.')[0]
-    label = f'{labelPath}{fileName}.xml'
-    w, h = getSizeFromXML(label)
+    nc: 2
+    names: ['With Helmet', 'Without Helmet']
 
-    # opencv loads images in bgr. the [:,:,::-1] does bgr -> rgb
-    image = cv2.imread(imgPath + imgFile)[:,:,::-1]
-    bboxes = getRectFromXML(classes, label)
+# yaml파일 생성 후 확인
 
-    # HorizontalFlip image
-    image, bboxes = RandomHorizontalFlip(1)(image.copy(), bboxes.copy())
+$ python train.py --img 416 --batch 16 --epochs 100 --data '../data.yaml' --cfg ./models/custom_yolov5s.yaml --weights '' --name yolov5s_results  --cache
 
-    # Save image
-    image = Image.fromarray(image, 'RGB')
-    newImgPath = f'./data/light/image/train/{className}/'
-    if not os.path.exists(newImgPath):
-        os.makedirs(newImgPath)
-    image.save(newImgPath + imgFile)
+                    from n    params  module                                  arguments                     
+    0                -1  1      3520  models.common.Focus                     [3, 32, 3]                    
+    1                -1  1     18560  models.common.Conv                      [32, 64, 3, 2]                
+    2                -1  1     19904  models.common.BottleneckCSP             [64, 64, 1]                   
+    3                -1  1     73984  models.common.Conv                      [64, 128, 3, 2]               
+    4                -1  1    161152  models.common.BottleneckCSP             [128, 128, 3]                 
+    5                -1  1    295424  models.common.Conv                      [128, 256, 3, 2]              
+    6                -1  1    641792  models.common.BottleneckCSP             [256, 256, 3]                 
+    7                -1  1   1180672  models.common.Conv                      [256, 512, 3, 2]              
+    8                -1  1    656896  models.common.SPP                       [512, 512, [5, 9, 13]]        
+    9                -1  1   1248768  models.common.BottleneckCSP             [512, 512, 1, False]          
+    10                -1  1    131584  models.common.Conv                      [512, 256, 1, 1]              
+    11                -1  1         0  torch.nn.modules.upsampling.Upsample    [None, 2, 'nearest']          
+    12           [-1, 6]  1         0  models.common.Concat                    [1]                           
+    13                -1  1    378624  models.common.BottleneckCSP             [512, 256, 1, False]          
+    14                -1  1     33024  models.common.Conv                      [256, 128, 1, 1]
 
-    # Save label
-    newXmlPath = f'./data/light/label/train/{className}/'
-    if not os.path.exists(newXmlPath):
-        os.makedirs(newXmlPath)
-    newXmlPath = newXmlPath + fileName + '.xml'
-    changeLabel(label, newXmlPath, newImgPath, bboxes)
-```
+# training
 
-### YOLO Training - keras
-- tiny yolov3 pretrained weights 
-```
-wget https://pjreddie.com/media/files/yolov3-tiny.weights
-```
-- Convert darknet model to keras model
-```
-python convert.py yolov3-tiny.cfg yolov3-tiny.weights model_data/yolo_tiny.h5
-```
-- tiny YOLO v3 converted model test
-```python
-from IPython.display import display
-from PIL import Image
-from yolo import YOLO
+$ python detect.py --weights runs/train/yolov5s_results/weights/best.pt --img 416 --conf 0.3 --source ../test/images
 
-def objectDetection(file, model_path, class_path):
-    yolo = YOLO(model_path=model_path, classes_path=class_path, anchors_path="model_data/tiny_yolo_anchors.txt")
-    image = Image.open(file)
-    result_image = yolo.detect_image(image)
-    display(result_image)
+    /content/yolov5
+    Namespace(agnostic_nms=False, augment=False, classes=None, conf_thres=0.3, device='', exist_ok=False, img_size=416, iou_thres=0.45, name='exp', project='runs/detect', save_conf=False, save_txt=False, source='../test/images', update=False, view_img=False, weights=['runs/train/yolov5s_results/weights/best.pt'])
 
-objectDetection('dog.jpg', 'model_data/yolo_tiny.h5', 'model_data/coco_classes.txt'
-```
-
-### Convert Annotation
-- Annotation example
-```
-path/to/img1.jpg 50,100,150,200,0 30,50,200,120,3
-path/to/img2.jpg 120,300,250,600,2
-```
-- Convert annotation
-```python
-import xml.etree.ElementTree as ET
-from os import getcwd
-import glob
-
-def convert_annotation(annotation_voc, train_all_file):
-    tree = ET.parse(annotation_voc)
-    root = tree.getroot()
-
-    for obj in root.iter('object'):
-        difficult = obj.find('difficult').text
-        cls = obj.find('name').text
-        if cls not in classes or int(difficult)==1: continue
-        cls_id = classes.index(cls)
-        xmlbox = obj.find('bndbox')
-        b = (int(xmlbox.find('xmin').text), int(xmlbox.find('ymin').text), int(xmlbox.find('xmax').text), int(xmlbox.find('ymax').text))
-        train_all_file.write(" " + ",".join([str(a) for a in b]) + ',' + str(cls_id))
-
-train_all_file = open('./data/light/train_all.txt', 'w')
-
-# Get annotations_voc list
-for className in classes:
-    annotations_voc = glob.glob(f'./data/light/label/train/{className}/*.xml')
-    for annotation_voc in annotations_voc:
-        image_id = annotation_voc.split('/')[-1].split('.')[0]+'.JPG'
-        train_all_file.write(f'./data/light/image/train/{className}/{image_id}')
-        convert_annotation(annotation_voc, train_all_file)
-        train_all_file.write('\n')
-train_all_file.close()
+# test image Detection
 ```
